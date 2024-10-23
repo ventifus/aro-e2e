@@ -8,6 +8,13 @@ standard_clusters:
     basic:
       # The simplest possible cluster
       name: aro
+    netencrypt:
+      name: aro
+      # Only certain VM sizes are supported for network encryption
+      master_vm_size: Standard_D8s_v4
+      worker_vm_size: Standard_D4s_v4
+      vnet_enable_encryption: true
+      vnet_encryption_enforcement_policy: AllowUnencrypted
   vars:
     resource_group: "{{ CLUSTERPREFIX }}-{{ inventory_hostname }}-{{ location }}"
     network_prefix_cidr: 10.0.0.0/22
@@ -99,7 +106,6 @@ private_clusters:
     master_vm_size: Standard_D8s_v3
     worker_cidr: 10.0.2.0/23
     worker_vm_size: Standard_D4s_v3
-
 
 udr_clusters:
   # https://learn.microsoft.com/en-us/azure/openshift/howto-create-private-cluster-4x
