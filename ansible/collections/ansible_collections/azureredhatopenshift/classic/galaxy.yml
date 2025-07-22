@@ -1,5 +1,5 @@
 namespace: azureredhatopenshift
-name: cluster
+name: classic
 version: 1.0.0
 readme: README.md
 authors:
@@ -9,7 +9,7 @@ license:
   - Apache-2.0
 tags: []
 dependencies: {
-  "azure.azcollections": "2.7.0"
+  "azure.azcollections": "3.3.1"
 }
 repository: https://github.com/openshift/aro-e2e
 issues: https://github.com/openshift/aro-e2e/issues

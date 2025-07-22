@@ -5,4 +5,4 @@
   environment:
     AZURE_CORE_SURVEY_MESSAGE: "false"
   roles:
-    - azureredhatopenshift.cluster.cleanup
+    - azureredhatopenshift.classic.cleanup

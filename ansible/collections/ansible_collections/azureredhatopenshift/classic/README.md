@@ -1,4 +1,4 @@
-# Ansible Collection - azureredhatopenshift.cluster
+# Ansible Collection - azureredhatopenshift.classic
 
 ## Supported variables
 

@@ -1,0 +1,118 @@
+- name: create_identities | Create control plane identities
+  loop:
+    - "cluster-api-azure"
+    - "control-plane"
+    - "cloud-controller-manager"
+    - "ingress"
+    - "disk-csi-driver"
+    - "file-csi-driver"
+    - "image-registry"
+    - "cloud-network-config"
+  ansible.builtin.command:
+    argv:
+      - az
+      - identity
+      - create
+      - --name={{ name }}-cp-{{ item }}
+      - --resource-group={{ resource_group }}
+      - --location={{ location }}
+      - -o=json
+  register: az_cp_identity_create
+  delegate_to: localhost
+
+- name: create_hcp_cluster | Debug az_cp_identity_create
+  ansible.builtin.debug:
+    var: az_cp_identity_create
+    verbosity: 1
+
+- name: create_identities | Create data plane identities
+  loop:
+    - "disk-csi-driver"
+    - "file-csi-driver"
+    - "image-registry"
+  ansible.builtin.command:
+    argv:
+      - az
+      - identity
+      - create
+      - --name={{ name }}-dp-{{ item }}
+      - --resource-group={{ resource_group }}
+      - --location={{ location }}
+      - -o=json
+  register: az_dp_identity_create
+  delegate_to: localhost
+
+- name: create_identities | Create service identity
+  ansible.builtin.command:
+    argv:
+      - az
+      - identity
+      - create
+      - --name={{ name }}-service-identity
+      - --resource-group={{ resource_group }}
+      - --location={{ location }}
+      - -o=json
+  register: az_service_identity_create
+  delegate_to: localhost
+
+- name: create_hcp_cluster | Debug az_dp_identity_create
+  ansible.builtin.debug:
+    var: az_dp_identity_create
+    verbosity: 1
+
+- name: create_identities | Set HCP identity mappings
+  ansible.builtin.set_fact:
+    user_assigned_identities: |
+      {% set comma = joiner(",") %}
+      {
+      {% for item in az_cp_identity_create.results %}
+        {{ comma() }}"{{ (item.stdout | from_json).id }}": {}
+      {% endfor %}
+      {% for item in az_dp_identity_create.results %}
+        {{ comma() }}"{{ (item.stdout | from_json).id }}": {}
+      {% endfor %}
+      }
+    control_plane_identities: |
+      {% set comma = joiner(",") %}
+      {
+      {% for item in az_cp_identity_create.results %}
+        {{ comma() }}"{{ item.item }}": "{{ (item.stdout | from_json).id }}"
+      {% endfor %}
+      }
+    data_plane_identities: |
+      {% set comma = joiner(",") %}
+      {
+      {% for item in az_dp_identity_create.results %}
+        {{ comma() }}"{{ item.item }}": "{{ (item.stdout | from_json).id }}"
+      {% endfor %}
+      }
+- name: create_hcp_cluster | Calculate master NSG ID
+  ansible.builtin.set_fact:
+    master_nsg_id: |-
+      {% for nsg in create_nsgs.results %}
+      {% if nsg.state.name == master_nsg %}
+      {{ nsg.state.id }}
+      {% endif %}
+      {% endfor %}
+- debug: var=master_nsg_id
+
+- name: cluster_create_module | Create aro cluster
+  azureredhatopenshift.hcp.azure_rm_openshiftmanagedcluster:
+    api_version: "{{ aro_api_version | d(omit) }}"
+    rp_mode: "{{ rp_mode | d(omit) }}"
+    name: "{{ name }}"
+    resource_group: "{{ resource_group }}"
+    location: "{{ location }}"
+    subnet_id: "{{ master_subnet_state.state.id }}"
+    network_security_group_id: "{{ master_nsg_id }}"
+    version: "{{ version | d(omit) }}"
+    control_plane_identities: "{{ control_plane_identities }}"
+    data_plane_identities: "{{ data_plane_identities }}"
+    service_identity: "{{ az_service_identity_create.stdout | from_json | json_query('id') }}"
+    tags:
+      createdby: "{{ currentuser_info.userPrincipalName | d(lookup('env', 'AZURE_CLIENT_ID')) | d('unknown') }}"
+      createdwith: ansible
+      purge: "true"
+  delegate_to: localhost
+  register: aro_cluster_state
+- debug: var=aro_cluster_state

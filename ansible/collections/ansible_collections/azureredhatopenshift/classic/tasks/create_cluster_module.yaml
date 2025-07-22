@@ -1,5 +1,5 @@
 - name: cluster_create_module | Create aro cluster
-  azureredhatopenshift.cluster.azure_rm_openshiftmanagedcluster:
+  azureredhatopenshift.classic.azure_rm_openshiftmanagedcluster:
     api_version: "{{ aro_api_version | d(omit) }}"
     rp_mode: "{{ rp_mode | default(omit) }}"
     name: "{{ name }}"

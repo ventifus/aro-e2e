@@ -1,0 +1,17 @@
+---
+- name: MIWI clusters
+  hosts: hcp_clusters
+  gather_facts: false
+  serial: "{{ max_simultaneous_clusters | default(1) }}"
+  environment:
+    AZURE_CORE_SURVEY_MESSAGE: "false"
+    REQUESTS_CA_BUNDLE: /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
+    RP_MODE: "{{ rp_mode | default(omit) }}"
+  roles:
+    - azureredhatopenshift.hcp.standard_cluster
+    - azureredhatopenshift.hcp.cleanup
+- name: Post-creation tasks
+  hosts: all
+  gather_facts: false
+  roles:
+    - azureredhatopenshift.hcp.post_creation

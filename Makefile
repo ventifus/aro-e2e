@@ -163,7 +163,7 @@ cluster:
 		-v ./ansible:/ansible$(PODMAN_VOLUME_OVERLAY) \
 		-v $(SSH_CONFIG_DIR):/root/.ssh$(PODMAN_VOLUME_OVERLAY) \
 		$(PODMAN_ARG_PULL_SECRET_MOUNT) \
-		-v ./ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
+		-v ./ansible/collections/ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
 		-e ANSIBLE_VERBOSITY=$(ANSIBLE_VERBOSITY) \
 		aro-ansible:$(VERSION) \
 			-i $(INVENTORY) \
@@ -187,7 +187,7 @@ cluster-cleanup:
 			-v $${AZURE_CONFIG_DIR:-~/.azure}:/opt/app-root/src/.azure$(PODMAN_VOLUME_OVERLAY) \
 			-v ./ansible:/ansible$(PODMAN_VOLUME_OVERLAY) \
 			-v $(SSH_CONFIG_DIR):/root/.ssh$(PODMAN_VOLUME_OVERLAY) \
-			-v ./ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
+			-v ./ansible/collections/ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
 			-e ANSIBLE_VERBOSITY=$(ANSIBLE_VERBOSITY) \
 			aro-ansible:$(VERSION) \
 				-i $(INVENTORY) \
@@ -210,7 +210,7 @@ lint-ansible:
 		-v $${AZURE_CONFIG_DIR:-~/.azure}:/opt/app-root/src/.azure$(PODMAN_VOLUME_OVERLAY) \
 		-v ./ansible:/ansible$(PODMAN_VOLUME_OVERLAY) \
 		-v $(SSH_CONFIG_DIR):/root/.ssh$(PODMAN_VOLUME_OVERLAY) \
-		-v ./ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
+		-v ./ansible/collections/ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
 		--entrypoint ansible-lint \
 		aro-ansible:$(VERSION) \
 			--offline \
@@ -222,7 +222,7 @@ test-ansible:
 		run \
 		--rm \
 		-it \
-		-v ./ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
+		-v ./ansible/collections/ansible_collections/azureredhatopenshift/cluster/:/opt/app-root/src/.local/share/pipx/venvs/ansible/lib/$(PYTHON_VERSION)/site-packages/ansible_collections/azureredhatopenshift/cluster$(PODMAN_VOLUME_OVERLAY) \
 		-v ./ansible:/ansible$(PODMAN_VOLUME_OVERLAY) \
 		-v $(SSH_CONFIG_DIR):/root/.ssh$(PODMAN_VOLUME_OVERLAY) \
 		--entrypoint ansible-test \

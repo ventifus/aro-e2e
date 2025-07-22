@@ -1,0 +1,20 @@
+hcp_clusters:
+  hosts:
+    hcp:
+      name: arohcp
+      version: "openshift-v4.19.0"
+  vars:
+    resource_group: "{{ CLUSTERPREFIX }}-{{ inventory_hostname }}-{{ location }}"
+    network_prefix_cidr: 10.0.0.0/22
+    master_cidr: 10.0.0.0/23
+    master_vm_size: Standard_D8s_v3
+    worker_cidr: 10.0.2.0/23
+    worker_vm_size: Standard_D2s_v3
+    aro_api_version: 2024-06-10-preview
+    nsgs:
+      - name: "worker-nsg"
+        rules: []
+      - name: "master-nsg"
+        rules: []
+    worker_nsg: "worker-nsg"
+    master_nsg: "master-nsg"

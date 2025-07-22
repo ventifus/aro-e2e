@@ -1,0 +1,64 @@
+- name: create_identities | Create platform identities
+  loop:
+    - {"type": "cp", "name": "cluster-api-azure"}
+    - {"type": "cp", "name": "control-plane"}
+    - {"type": "cp", "name": "cloud-controller-manager"}
+    - {"type": "cp", "name": "ingress"}
+    - {"type": "cp", "name": "disk-csi-driver"}
+    - {"type": "cp", "name": "file-csi-driver"}
+    - {"type": "cp", "name": "image-registry"}
+    - {"type": "cp", "name": "cloud-network-config"}
+    - {"type": "dp", "name": "disk-csi-driver"}
+    - {"type": "dp", "name": "file-csi-driver"}
+    - {"type": "dp", "name": "image-registry"}
+    - {"type": "dp", "name": "service-managed-identity"}
+  ansible.builtin.command:
+    argv:
+      - az
+      - identity
+      - create
+      - --name={{ name }}-{{ item.type }}-{{ item.operator }}
+      - --resource-group={{ resource_group }}
+      - -o=json
+  register: az_identity_create
+  delegate_to: localhost
+- name: create_identities | Create role assignments
+  loop: "{{ az_identity_create.results }}"
+  azure.azcollection.azure_rm_roleassignment:
+    scope: "{{ rg_info.state.id }}"
+    assignee_object_id: "{{ (item.stdout | from_json).principalId }}"
+    role_definition_id: "{{ item.item.roleDefinitionId }}"
+  register: roleassignment_create
+  delegate_to: localhost
+- name: create_identities | Create mock MSI role assignments
+  # when: mock_msi_object_id is defined
+  loop: "{{ az_identity_create.results }}"
+  azure.azcollection.azure_rm_roleassignment:
+    scope: "{{ rg_info.state.id }}"
+    assignee_object_id: "{{ mock_msi_object_id }}"
+    role_definition_id: "{{ item.item.roleDefinitionId }}"
+  register: roleassignment_create
+  delegate_to: localhost
+- name: create_identities | Set MIWI cluster creation parameters
+  ansible.builtin.set_fact:
+    platform_workload_identities: |
+      {% set comma = joiner(",") %}
+      {
+        {% for item in az_identity_create.results %}
+        {{ comma() }}"{{ item.item.operatorName }}": {"resource_id": "{{ (item.stdout | from_json).id }}" }
+        {% endfor %}
+      }
+    cluster_extra_args: |
+      [
+      "--enable-managed-identity"
+      ,"--asign-cluster-identity={{ name }}-Cluster"
+      {% for item in platformworkloadidentityrolesets.value[0].properties.platformWorkloadIdentityRoles %}
+      ,"--assign-platform-worload-identity {{ item.operatorName }} {{ name }}-{{ item.operatorName }}"
+      {% endfor %}
+      ]
+- name: create_identities | Show user assigned identity
+  debug:
+    var: user_assigned_identities
+- name: create_identities | Show platform workload identities
+  debug:
+    var: platform_workload_identities

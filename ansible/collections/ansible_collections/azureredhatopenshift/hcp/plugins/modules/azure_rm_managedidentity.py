@@ -1,0 +1,1 @@
+../../classic/plugins/modules/azure_rm_managedidentity.py

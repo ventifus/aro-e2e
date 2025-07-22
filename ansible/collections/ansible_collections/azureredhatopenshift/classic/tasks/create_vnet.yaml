@@ -5,6 +5,10 @@
     name: "{{ item.name }}"
     resource_group: "{{ resource_group }}"
     rules: "{{ item.rules }}"
+    tags:
+      createdby: "{{ currentuser_info.userPrincipalName | default(lookup('env', 'AZURE_CLIENT_ID')) | default('unknown') }}"
+      createdwith: "ansible"
+      purge: "true"
   register: create_nsgs
   loop: "{{ nsgs }}"
   delegate_to: localhost
@@ -123,13 +127,7 @@
     # policies cannot be enabled on private link service subnet
     private_link_service_network_policies: Disabled
     route_table: "{% if routes is defined %}{{ vnet_name | default('aro-vnet') }}-rt{% else %}{{ omit }}{% endif %}"
-    security_group: >-
-      {% if master_nsg is defined %}
-      {
-        "name": "{{ master_nsg }}",
-        "resource_group": "{{ resource_group }}"
-      }
-      {% else %}{{ omit }}{% endif %}
+    security_group: "{{ master_nsg | d(omit)}}"
   delegate_to: localhost
   register: master_subnet_state
 - name: create_vnet | Debug master_subnet_state
@@ -143,13 +141,7 @@
     address_prefix_cidr: "{{ worker_cidr }}"
     resource_group: "{{ resource_group }}"
     route_table: "{% if routes is defined %}{{ vnet_name | default('aro-vnet') }}-rt{% else %}{{ omit }}{% endif %}"
-    security_group: >-
-      {% if worker_nsg is defined %}
-      {
-        "name": "{{ master_nsg }}",
-        "resource_group": "{{ resource_group }}"
-      }
-      {% else %}{{ omit }}{% endif %}
+    security_group: "{{ worker_nsg | d(omit)}}"
   delegate_to: localhost
   register: worker_subnet_state
 - name: create_vnet | Debug worker_subnet_state

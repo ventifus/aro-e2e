@@ -8,9 +8,9 @@
     REQUESTS_CA_BUNDLE: /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
     RP_MODE: "{{ rp_mode | default(omit) }}"
   roles:
-    - azureredhatopenshift.cluster.standard_cluster
-    - azureredhatopenshift.cluster.smoketest
-    - azureredhatopenshift.cluster.cleanup
+    - azureredhatopenshift.classic.standard_cluster
+    - azureredhatopenshift.classic.smoketest
+    - azureredhatopenshift.classic.cleanup
 - name: Bring your own keys disk encryption
   hosts: byok_clusters
   gather_facts: false
@@ -20,9 +20,9 @@
     REQUESTS_CA_BUNDLE: /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
     RP_MODE: "{{ rp_mode | default(omit) }}"
   roles:
-    - azureredhatopenshift.cluster.byok_cluster
-    - azureredhatopenshift.cluster.smoketest
-    - azureredhatopenshift.cluster.cleanup
+    - azureredhatopenshift.classic.byok_cluster
+    - azureredhatopenshift.classic.smoketest
+    - azureredhatopenshift.classic.cleanup
 - name: MIWI clusters
   hosts: miwi_clusters
   gather_facts: false
@@ -32,11 +32,11 @@
     REQUESTS_CA_BUNDLE: /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt
     RP_MODE: "{{ rp_mode | default(omit) }}"
   roles:
-    - azureredhatopenshift.cluster.miwi_cluster
-    - azureredhatopenshift.cluster.smoketest
-    - azureredhatopenshift.cluster.cleanup
+    - azureredhatopenshift.classic.miwi_cluster
+    - azureredhatopenshift.classic.smoketest
+    - azureredhatopenshift.classic.cleanup
 - name: Post-creation tasks
   hosts: all
   gather_facts: false
   roles:
-    - azureredhatopenshift.cluster.post_creation
+    - azureredhatopenshift.classic.post_creation
