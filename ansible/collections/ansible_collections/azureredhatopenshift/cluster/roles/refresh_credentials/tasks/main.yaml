@@ -22,7 +22,9 @@
       - update
       - --name={{ cluster_name }}
       - --resource-group={{ resource_group }}
-      - --refresh-credentials
+      - "{% if csp_info.password | d('') != '' %}--client-secret={{ csp_info.password }}{% else %}{{ omit }}{% endif %}"
+      - "{% if csp_info.appId | d('') != '' %}--client-id={{ csp_info.appId }}{% else %}{{ omit }}{% endif %}"
+      - "{% if csp_info is defined %}--refresh-credentials{% else %}{{ omit }}{% endif %}"
       - -o=yaml
   delegate_to: localhost
   register: refresh_credentials_aro_refresh_credentials

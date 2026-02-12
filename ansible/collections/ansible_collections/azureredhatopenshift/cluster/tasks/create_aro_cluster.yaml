@@ -531,11 +531,13 @@
   delegate_to: localhost
   register: new_kubeconfig_slurp
   changed_when: false
+  no_log: true # Avoid leaking admin kubeconfig in logs
 
 - name: create_aro_cluster | Set new kubeconfig content fact
   ansible.builtin.set_fact:
     new_kubeconfig_content: "{{ new_kubeconfig_slurp.content | b64decode }}"
   delegate_to: localhost
+  no_log: true # Avoid leaking admin kubeconfig in logs
 
 - name: create_aro_cluster | Delete temp kubeconfig file
   ansible.builtin.file:
